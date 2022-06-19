@@ -1,67 +1,67 @@
 package problem
 
-import "math"
-
 // Minimum Window Substring
 // https://leetcode.com/problems/minimum-window-substring/
 
 func minWindow(s string, t string) string {
-	letterMap := make(map[rune]int)
-	for _, letter := range t {
-		letterMap[letter]++
+	mapT := make(map[rune]int)
+	for _, r := range t {
+		mapT[r]++
 	}
 
-	answer := []rune{}
-	answerLen := math.MaxInt
+	answer := struct {
+		length int
+		start  int
+		end    int
+	}{
+		length: -1,
+	}
 
-	input := []rune(s)
-	inputLen := len(input)
+	type Indice struct {
+		idx int
+		val rune
+	}
 
-	letterCount := len(t)
-	letterFoundMap := make(map[rune]int)
-	letterFound := 0
-	left, right := 0, 0
-
-	for ; right < inputLen; right++ {
-		// grow window
-		letter := input[right]
-
-		max, ok := letterMap[letter]
-		if ok {
-			letterFoundMap[letter]++
-			if letterFoundMap[letter] <= max {
-				letterFound++
-			}
-
-			// if found all, shrink window for minimum answer
-			for letterFound == letterCount {
-				if right-left < answerLen {
-					answer = input[left : right+1]
-					answerLen = right - left
-				}
-
-				if left >= right {
-					break
-				}
-
-				victim := input[left]
-				letterFoundMap[victim]--
-				if letterFoundMap[victim] < letterMap[victim] {
-					letterFound--
-				}
-				left++
-
-				for {
-					if _, ok := letterMap[input[left]]; ok {
-						break
-					}
-					left++
-				}
-			}
-		} else if letterFound == 0 {
-			left++
+	filteredS := []Indice{}
+	for i, r := range s {
+		if _, ok := mapT[r]; ok {
+			filteredS = append(filteredS, Indice{i, r})
 		}
 	}
 
-	return string(answer)
+	foundMap := make(map[rune]int)
+	found := 0
+	left, right := 0, 0
+
+	for right < len(filteredS) {
+		indiceR := filteredS[right]
+
+		foundMap[indiceR.val]++
+		if foundMap[indiceR.val] <= mapT[indiceR.val] {
+			found++
+		}
+
+		for left <= right && found == len(t) {
+			indiceL := filteredS[left]
+
+			newAnswerLen := indiceR.idx - indiceL.idx + 1
+			if answer.length == -1 || newAnswerLen < answer.length {
+				answer.length = newAnswerLen
+				answer.start = indiceL.idx
+				answer.end = indiceR.idx
+			}
+
+			foundMap[indiceL.val]--
+			if foundMap[indiceL.val] < mapT[indiceL.val] {
+				found--
+			}
+			left++
+		}
+		right++
+	}
+
+	if answer.length == -1 {
+		return ""
+	}
+	return string([]rune(s)[answer.start : answer.end+1])
 }
