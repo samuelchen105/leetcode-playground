@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestP030(t *testing.T) {
+func TestP30(t *testing.T) {
 	testcases := []struct {
 		input1   string
 		input2   []string

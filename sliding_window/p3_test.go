@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestP003(t *testing.T) {
+func TestP3(t *testing.T) {
 	testcases := []struct {
 		input    string
 		expected int
