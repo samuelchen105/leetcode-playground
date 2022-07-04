@@ -4,48 +4,55 @@ package problem
 // https://leetcode.com/problems/permutation-in-string/
 
 func checkInclusion(s1 string, s2 string) bool {
-	charMap := make(map[rune]int)
-	for _, r := range s1 {
-		charMap[r]++
+	if len(s1) > len(s2) {
+		return false
 	}
-	threshold := len(s1)
-	windowChar := make(map[rune]int)
-	charFound := 0
 
-	runes := []rune(s2)
-	l := 0
-	exceed := false
-	for r, char := range runes {
-		maxCount, ok := charMap[char]
-		if !ok {
-			l = r + 1
-			charFound = 0
-			windowChar = make(map[rune]int)
-			exceed = false
-			continue
-		}
+	rs1 := []rune(s1)
+	rs2 := []rune(s2)
 
-		for exceed && l <= r {
-			charL := runes[l]
-			windowChar[charL]--
-			l++
-			if windowChar[charL] >= charMap[charL] {
-				exceed = false
+	mapS1 := make(map[rune]int)
+	mapS2 := make(map[rune]int)
+	for i := 0; i < len(s1); i++ {
+		mapS1[rs1[i]]++
+		mapS2[rs2[i]]++
+	}
+
+	found := 0
+	for ru, co := range mapS2 {
+		if _, ok := mapS1[ru]; ok {
+			if co >= mapS1[ru] {
+				found += mapS1[ru]
 			} else {
-				charFound--
+				found += co
 			}
 		}
+	}
 
-		windowChar[char]++
-		if windowChar[char] <= maxCount {
-			charFound++
-		} else {
-			exceed = true
+	if found == len(rs1) {
+		return true
+	}
+
+	l := 0
+	for r := len(rs1); r < len(rs2); r++ {
+		charL := rs2[l]
+		charR := rs2[r]
+
+		mapS2[charR]++
+		if countS1, ok := mapS1[charR]; ok && mapS2[charR] <= countS1 {
+			found++
 		}
 
-		if charFound == threshold {
+		mapS2[charL]--
+		if countS1, ok := mapS1[charL]; ok && mapS2[charL] < countS1 {
+			found--
+		}
+
+		if found == len(rs1) {
 			return true
 		}
+
+		l++
 	}
 
 	return false
